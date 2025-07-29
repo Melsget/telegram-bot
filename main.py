@@ -1,11 +1,9 @@
 import logging
 import os
 from aiogram import Bot, Dispatcher, types
-from aiogram.types import ParseMode
-from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from fastapi import FastAPI, Request
-from aiogram.utils import executor
 from dotenv import load_dotenv
+from aiogram.utils import executor
 
 # Load environment variables (like your BOT_TOKEN)
 load_dotenv()
@@ -39,9 +37,6 @@ async def handle_webhook(request: Request):
 async def on_startup():
     webhook_url = "https://your-app-name.onrender.com/webhook"  # Set your Render app URL here
     await bot.set_webhook(webhook_url)  # Set the webhook for Telegram to send updates to
-
-# Set up the logging middleware
-dp.middleware.setup(LoggingMiddleware())
 
 if __name__ == "__main__":
     import uvicorn
