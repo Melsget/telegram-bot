@@ -1,19 +1,48 @@
+import logging
+import os
 from aiogram import Bot, Dispatcher, types
-from aiogram.filters import CommandStart
-import asyncio
+from aiogram.types import ParseMode
+from aiogram.contrib.middlewares.logging import LoggingMiddleware
+from fastapi import FastAPI, Request
+from aiogram.utils import executor
+from dotenv import load_dotenv
 
-# Your bot token
-BOT_TOKEN = "8229044540:AAEAE9Lxs4XwOBqJ4cFO4vydvMFlDdxldC4"
+# Load environment variables (like your BOT_TOKEN)
+load_dotenv()
+API_TOKEN = os.getenv("BOT_TOKEN")
 
-bot = Bot(token=BOT_TOKEN)
-dp = Dispatcher()
+# Set up bot and dispatcher
+bot = Bot(token=API_TOKEN)
+dp = Dispatcher(bot)
 
-@dp.message(CommandStart())
-async def start_handler(message: types.Message):
-    await message.answer("Hello, I'm your bot!")
+# Set up FastAPI app for the webhook
+app = FastAPI()
 
-async def main():
-    await dp.start_polling(bot)
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+
+# This handler will be triggered when the user types "/start"
+@dp.message_handler(commands=["start"])
+async def send_welcome(message: types.Message):
+    await message.reply("Hello! I am your webhook Telegram bot. How can I help you today?")
+
+# Webhook handler to process the incoming updates from Telegram
+@app.post("/webhook")
+async def handle_webhook(request: Request):
+    data = await request.json()  # Receive the incoming update
+    update = types.Update(**data)  # Parse it into aiogram's Update format
+    await dp.process_update(update)  # Pass it to aiogram's Dispatcher
+    return {"ok": True}
+
+# Set the webhook URL on bot startup
+@app.on_event("startup")
+async def on_startup():
+    webhook_url = "https://your-app-name.onrender.com/webhook"  # Set your Render app URL here
+    await bot.set_webhook(webhook_url)  # Set the webhook for Telegram to send updates to
+
+# Set up the logging middleware
+dp.middleware.setup(LoggingMiddleware())
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
