@@ -3,7 +3,7 @@ import os
 from aiogram import Bot, Dispatcher, types
 from fastapi import FastAPI, Request
 from dotenv import load_dotenv
-from aiogram.utils import executor
+import uvicorn
 
 # Load environment variables (like your BOT_TOKEN)
 load_dotenv()
@@ -39,5 +39,5 @@ async def on_startup():
     await bot.set_webhook(webhook_url)  # Set the webhook for Telegram to send updates to
 
 if __name__ == "__main__":
-    import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
