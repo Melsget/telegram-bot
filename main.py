@@ -11,7 +11,10 @@ API_TOKEN = os.getenv("BOT_TOKEN")
 
 # Set up bot and dispatcher
 bot = Bot(token=API_TOKEN)
-dp = Dispatcher(bot)
+dp = Dispatcher()
+
+# Register bot with dispatcher
+dp.setup(bot)
 
 # Set up FastAPI app for the webhook
 app = FastAPI()
@@ -40,4 +43,3 @@ async def on_startup():
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
-
